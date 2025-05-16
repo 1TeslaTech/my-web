@@ -1,4 +1,4 @@
-let ws = null;
+let wss = null;
 
 function login() {
   const username = document.getElementById('username').value;
@@ -15,13 +15,13 @@ function login() {
 
 function connectWebSocket() {
   // آدرس IP ماژول ESP8266 رو اینجا وارد کنید
-  ws = new WebSocket('ws://192.168.177.183:81');
+  wss = new WebSocket('wss://192.168.177.183:81');
 
-  ws.onopen = () => {
+  wss.onopen = () => {
     console.log('WebSocket connected');
   };
 
-  ws.onmessage = (event) => {
+  wss.onmessage = (event) => {
     const data = event.data;
     if (data.startsWith('STATUS')) {
       const parts = data.split(':');
@@ -31,20 +31,20 @@ function connectWebSocket() {
     }
   };
 
-  ws.onclose = () => {
+  wss.onclose = () => {
     console.log('WebSocket disconnected. Reconnecting...');
     setTimeout(connectWebSocket, 5000);
   };
 
-  ws.onerror = (error) => {
+  wss.onerror = (error) => {
     console.error('WebSocket error:', error);
   };
 }
 
 function toggleRelay(relayNum) {
   const state = document.getElementById(`status${relayNum}`).textContent === 'ON' ? 0 : 1;
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(`RELAY${relayNum}:${state}`);
+  if (wss && wss.readyState === WebSocket.OPEN) {
+    wss.send(`RELAY${relayNum}:${state}`);
   }
 }
 
