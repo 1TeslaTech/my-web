@@ -4,18 +4,18 @@ function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
 
-  if (username === 'admin' && password === 'admin') {
+  if (username === 'Ali' && password === '12345678') {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('control-page').style.display = 'block';
     connectWebSocket();
   } else {
-    alert('Invalid username or password');
+    alert('نام کاربری یا رمز عبور نامعتبر است');
   }
 }
 
 function connectWebSocket() {
   // آدرس IP ماژول ESP8266 رو اینجا وارد کنید
-  ws = new WebSocket('ws://192.168.177.183:81');
+  ws = new WebSocket('ws://5.216.86.89:81');
 
   ws.onopen = () => {
     console.log('WebSocket connected');
