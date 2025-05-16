@@ -15,7 +15,7 @@ function login() {
 
 function connectWebSocket() {
   // آدرس IP ماژول ESP8266 رو اینجا وارد کنید
-  ws = new WebSocket('ws://5.216.86.89:81');
+  ws = new WebSocket('ws://192.168.177.183:81');
 
   ws.onopen = () => {
     console.log('WebSocket connected');
