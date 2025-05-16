@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Home Control</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="login-page">
+    <div class="login-container">
+      <h2>Login</h2>
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button onclick="login()">Login</button>
+    </div>
+  </div>
+
+  <div id="control-page" style="display: none;">
+    <h1>Smart Home Control</h1>
+    <div class="relay-container">
+      <div class="relay-box">
+        <h3>Relay 1</h3>
+        <button id="relay1" onclick="toggleRelay(1)">Toggle</button>
+        <p>Status: <span id="status1">OFF</span></p>
+      </div>
+      <div class="relay-box">
+        <h3>Relay 2</h3>
+        <button id="relay2" onclick="toggleRelay(2)">Toggle</button>
+        <p>Status: <span id="status2">OFF</span></p>
+      </div>
+      <div class="relay-box">
+        <h3>Relay 3</h3>
+        <button id="relay3" onclick="toggleRelay(3)">Toggle</button>
+        <p>Status: <span id="status3">OFF</span></p>
+      </div>
+      <div class="relay-box">
+        <h3>Relay 4</h3>
+        <button id="relay4" onclick="toggleRelay(4)">Toggle</button>
+        <p>Status: <span id="status4">OFF</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
