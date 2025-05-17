@@ -9,7 +9,7 @@ function login() {
     document.getElementById('control-page').style.display = 'block';
     connectWebSocket();
   } else {
-    alert('نام کاربری یا رمز عبور نامعتبر است');
+    alert('عزک. الرمز اشتباه');
   }
 }
 
