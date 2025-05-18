@@ -1,27 +1,49 @@
-let wss = null;
+let ws = null;
+
+function checkLoginStatus() {
+  if (localStorage.getItem('isLoggedIn') === 'true') {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('control-page').style.display = 'block';
+    connectWebSocket();
+  }
+}
 
 function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
 
-  if (username === 'Ali' && password === '12345678') {
+  if (username === 'admin' && password === 'admin') {
+    localStorage.setItem('isLoggedIn', 'true');
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('control-page').style.display = 'block';
     connectWebSocket();
   } else {
-    alert('عزک. الرمز اشتباه');
+    alert('Invalid username or password');
   }
 }
 
-function connectWebSocket() {
-  // آدرس IP ماژول ESP8266 رو اینجا وارد کنید
-  wss = new WebSocket('wss://192.168.177.183:81');
+function logout() {
+  localStorage.removeItem('isLoggedIn');
+  document.getElementById('control-page').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  if (ws) {
+    ws.close();
+    ws = null;
+  }
+  updateConnectionStatus(false);
+}
 
-  wss.onopen = () => {
-    console.log('WebSocket connected');
+function connectWebSocket() {
+  console.log('Attempting to connect to WebSocket...');
+  ws = new WebSocket('ws://192.168.177.183:81');
+
+  ws.onopen = () => {
+    console.log('WebSocket connected successfully');
+    updateConnectionStatus(true);
   };
 
-  wss.onmessage = (event) => {
+  ws.onmessage = (event) => {
+    console.log('Received:', event.data);
     const data = event.data;
     if (data.startsWith('STATUS')) {
       const parts = data.split(':');
@@ -31,20 +53,39 @@ function connectWebSocket() {
     }
   };
 
-  wss.onclose = () => {
+  ws.onclose = () => {
     console.log('WebSocket disconnected. Reconnecting...');
+    updateConnectionStatus(false);
     setTimeout(connectWebSocket, 5000);
   };
 
-  wss.onerror = (error) => {
+  ws.onerror = (error) => {
     console.error('WebSocket error:', error);
+    updateConnectionStatus(false);
   };
+}
+
+function updateConnectionStatus(isConnected) {
+  const dot = document.querySelector('.status-dot');
+  const text = document.getElementById('connection-text');
+  if (isConnected) {
+    dot.classList.add('connected');
+    text.textContent = 'Online';
+    text.classList.add('connected');
+  } else {
+    dot.classList.remove('connected');
+    text.textContent = 'Offline';
+    text.classList.remove('connected');
+  }
 }
 
 function toggleRelay(relayNum) {
   const state = document.getElementById(`status${relayNum}`).textContent === 'ON' ? 0 : 1;
-  if (wss && wss.readyState === WebSocket.OPEN) {
-    wss.send(`RELAY${relayNum}:${state}`);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    console.log(`Sending: RELAY${relayNum}:${state}`);
+    ws.send(`RELAY${relayNum}:${state}`);
+  } else {
+    console.error('WebSocket is not connected');
   }
 }
 
@@ -52,6 +93,60 @@ function updateRelayStatus(relayNum, state) {
   const statusElement = document.getElementById(`status${relayNum}`);
   const buttonElement = document.getElementById(`relay${relayNum}`);
   statusElement.textContent = state ? 'ON' : 'OFF';
-  statusElement.style.color = state ? '#00e676' : '#ff1744';
-  buttonElement.style.backgroundColor = state ? '#00e676' : '#6200ea';
+  statusElement.className = state ? '' : 'off';
+  buttonElement.className = `relay-btn ${state ? 'on' : 'off'}`;
 }
+
+// ظپظˆع©ظˆط³ ط®ظˆط¯ع©ط§ط± ط¨ط§ Enter
+document.getElementById('username').addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') {
+    document.getElementById('password').focus();
+  }
+});
+
+document.getElementById('password').addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') {
+    login();
+  }
+});
+
+// ط§ظپع©طھ ظ…ظˆط¬â€Œظ‡ط§غŒ ظ†ط±ظ…
+const canvas = document.getElementById('waves');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const waves = [
+  { y: canvas.height * 0.3, amplitude: 20, frequency: 0.02, phase: 0 },
+  { y: canvas.height * 0.5, amplitude: 25, frequency: 0.015, phase: Math.PI / 2 },
+  { y: canvas.height * 0.7, amplitude: 15, frequency: 0.025, phase: Math.PI }
+];
+
+function drawWaves() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  waves.forEach(wave => {
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 2;
+    for (let x = 0; x < canvas.width; x++) {
+      const y = wave.y + Math.sin(x * wave.frequency + wave.phase) * wave.amplitude;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    wave.phase += 0.05; // ط³ط±ط¹طھ ط­ط±ع©طھ ظ…ظˆط¬
+  });
+}
+
+function animateWaves() {
+  drawWaves();
+  requestAnimationFrame(animateWaves);
+}
+
+animateWaves();
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+window.onload = checkLoginStatus;
